@@ -1,1 +1,113 @@
 the service side for restful API'S
+
+
+import ballerina/io;
+import ballerina/http;
+import ballerina/log;
+
+type Programme record {
+    string programmeCode;
+    int nqfLevel;
+    string facultyName;
+    string departmentName;
+    string programmeTitle;
+    string registrationDate;
+    Course[] courses;
+};
+
+type Course record {
+    string courseName;
+    string courseCode;
+    int nqfLevel;
+};
+
+// In-memory data storage for programmes (defined globally)
+map<Programme> programmes = {};
+
+service /programmeService on new http:Listener(8080) {
+
+    // 1. Add a new programme
+    resource function post addProgramme(http:Caller caller, http:Request req) returns error? {
+        json payload = check req.getJsonPayload();
+        Programme newProgramme = check payload.cloneWithType(Programme);
+        
+        if programmes.hasKey(newProgramme.programmeCode) {
+            check caller->respond("Programme with this code already exists");
+        } else {
+            programmes[newProgramme.programmeCode] = newProgramme;
+            check caller->respond("Programme added successfully");
+        }
+    }
+
+    // 2. Retrieve a list of all programmes within the Programme Development Unit
+    resource function get allProgrammes(http:Caller caller) returns error? {
+        json allProgrammes = programmes.toJson();
+        check caller->respond(allProgrammes);
+    }
+
+    // 3. Update an existing programme's information according to the programme code
+    resource function put updateProgramme(http:Caller caller, http:Request req, string programmeCode) returns error? {
+        if !programmes.hasKey(programmeCode) {
+            check caller->respond("Programme not found");
+        } else {
+            json payload = check req.getJsonPayload();
+            Programme updatedProgramme = check payload.cloneWithType(Programme);
+            programmes[programmeCode] = updatedProgramme;
+            check caller->respond("Programme updated successfully");
+        }
+    }
+
+    // 4. Retrieve the details of a specific programme by their programme code
+    resource function get programmeByCode(http:Caller caller, string programmeCode) returns error? {
+        if programmes.hasKey(programmeCode) {
+            check caller->respond(programmes[programmeCode].toJson());
+        } else {
+            check caller->respond("Programme not found");
+        }
+    }
+
+    // 5. Delete a programme's record by their programme code
+resource function delete deleteProgramme(http:Caller caller, string programmeCode) returns error? {
+    // Check if the programme with the given code exists
+    boolean exists = programmes.hasKey(programmeCode);
+    if (exists) {
+        // Remove the programme from the map
+        programmes.remove(programmeCode);
+        // Respond to the caller indicating successful deletion
+        check caller->respond("Programme deleted successfully");
+    } else {
+        // Respond to the caller indicating the programme was not found
+        check caller->respond("Programme not found");
+    }
+}
+
+ // 6. Retrieve all the programmes that are due for review (after 5 years)
+resource function get programmesForReview(http:Caller caller) returns error? {
+    json[] reviewProgrammes = [];  // Define as a json array
+    foreach var [_, programme] in programmes.entries() {
+        if checkYearsForReview(programme.registrationDate) {
+            reviewProgrammes[reviewProgrammes.length()] = programme.toJson();  // Add to json array
+        }
+    }
+    check caller->respond(reviewProgrammes);
+}
+
+  // 7. Retrieve all the programmes that belong to the same faculty
+resource function get programmesByFaculty(http:Caller caller, string facultyName) returns error? {
+    json[] facultyProgrammes = [];  // Define as a json array
+    foreach var [_, programme] in programmes.entries() {
+        if programme.facultyName == facultyName {
+            facultyProgrammes[facultyProgrammes.length()] = programme.toJson();  // Add to json array
+        }
+    }
+    check caller->respond(facultyProgrammes);
+}
+
+     // Helper function to check if a programme is due for review (after 5 years)
+function checkYearsForReview(string registrationDate) returns boolean {
+    // Extract the year from the registration date (assuming the format is "YYYY-MM-DD")
+    int yearRegistered = check 'int:fromString(registrationDate.substring(0, 4));
+    int currentYear = 2024;  // Replace with the current year dynamically in a real system
+    // Check if 5 or more years have passed since registration
+    return (currentYear - yearRegistered) >= 5;
+}
