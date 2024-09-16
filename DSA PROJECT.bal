@@ -113,3 +113,6 @@ function checkYearsForReview(string registrationDate) returns boolean|error {
     // Check if 5 or more years have passed since registration
     return (currentYear - yearRegistered) >= 5;
 }
+
+
+THE SERVER SIDE ONLY
