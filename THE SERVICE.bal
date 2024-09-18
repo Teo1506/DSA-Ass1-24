@@ -41,14 +41,14 @@ service /programme on new http:Listener(8080) {
         }
     }
 
-    //  Retrieve a list of all programmes within the Programme Development Unit
+    //  Returns all programmes
     resource function get allProgrammes(http:Caller caller) returns error? {
     var allProgrammes = programmes.toArray() , toJson();
     check caller->respond(allProgrammes);
 }
 
 
-    //  Update an existing programme's information according to the programme code
+    //  Update an existing programme by programme code
     resource function put updateProgramme(http:Caller caller, http:Request req, string programmeCode) returns error? {
         // Check if the programme exists
         var existingProgramme = programmes.get(programmeCode);
@@ -63,7 +63,7 @@ service /programme on new http:Listener(8080) {
         }
     }
 
-    //  Retrieve the details of a specific programme by their programme code
+    //  Return the details of a specific programme by their programme code
     resource function get programmeByCode(http:Caller caller, string programmeCode) returns error? {
         var programme = programmes.get(programmeCode);
         if (programme is Programme) {
@@ -85,7 +85,7 @@ service /programme on new http:Listener(8080) {
         }
     }
 
-    //  Retrieve all the programmes that are due for review (after 5 years)
+    //  Returns all programmes due for review (after 5 years)
     resource function get programmesForReview(http:Caller caller) returns error? {
         json[] reviewProgrammes = [];  // Define as a json array
         foreach var programme in programmes {
@@ -96,7 +96,7 @@ service /programme on new http:Listener(8080) {
         check caller->respond(reviewProgrammes);
     }
 
-    //  Retrieve all the programmes that belong to the same faculty
+    //  Return all  programmes of the same faculty
     resource function get programmesByFaculty(http:Caller caller, string facultyName) returns error? {
         json[] facultyProgrammes = [];  // Define as a json array
         foreach var programme in programmes {
@@ -108,7 +108,7 @@ service /programme on new http:Listener(8080) {
     }
 }
 
-// Helper function to check if a programme is due for review (after 5 years)
+//  checking if  programme is due for review (after 5 years)
 function checkYearsForReview(string registrationDate) returns boolean|error {
     // Extract the year from the registration date (assuming the format is "YYYY-MM-DD")
     int yearRegistered = check 'int:fromString(registrationDate.substring(0, 4));
