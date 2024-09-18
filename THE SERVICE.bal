@@ -25,7 +25,7 @@ table<Programme> key(programmeCode) programmes = table [];
 // Service to manage programme records
 service /programme on new http:Listener(8080) {
 
-    // 1. Add a new programme
+    //  Add a new programme
     resource function post addProgramme(http:Caller caller, http:Request req) returns error? {
         json payload = check req.getJsonPayload();
         Programme newProgramme = check payload.cloneWithType(Programme);
@@ -41,13 +41,14 @@ service /programme on new http:Listener(8080) {
         }
     }
 
-    // 2. Retrieve a list of all programmes within the Programme Development Unit
+    //  Retrieve a list of all programmes within the Programme Development Unit
     resource function get allProgrammes(http:Caller caller) returns error? {
-        json allProgrammes = programmes.toArray().toJson();
-        check caller->respond(allProgrammes);
-    }
+    var allProgrammes = programmes.toArray() , toJson();
+    check caller->respond(allProgrammes);
+}
 
-    // 3. Update an existing programme's information according to the programme code
+
+    //  Update an existing programme's information according to the programme code
     resource function put updateProgramme(http:Caller caller, http:Request req, string programmeCode) returns error? {
         // Check if the programme exists
         var existingProgramme = programmes.get(programmeCode);
@@ -62,7 +63,7 @@ service /programme on new http:Listener(8080) {
         }
     }
 
-    // 4. Retrieve the details of a specific programme by their programme code
+    //  Retrieve the details of a specific programme by their programme code
     resource function get programmeByCode(http:Caller caller, string programmeCode) returns error? {
         var programme = programmes.get(programmeCode);
         if (programme is Programme) {
@@ -72,7 +73,7 @@ service /programme on new http:Listener(8080) {
         }
     }
 
-    // 5. Delete a programme's record by their programme code
+    //  Delete a programme's record by their programme code
     resource function delete deleteProgramme(http:Caller caller, string programmeCode) returns error? {
         var programme = programmes.get(programmeCode);
         if (programme is Programme) {
@@ -84,7 +85,7 @@ service /programme on new http:Listener(8080) {
         }
     }
 
-    // 6. Retrieve all the programmes that are due for review (after 5 years)
+    //  Retrieve all the programmes that are due for review (after 5 years)
     resource function get programmesForReview(http:Caller caller) returns error? {
         json[] reviewProgrammes = [];  // Define as a json array
         foreach var programme in programmes {
@@ -95,7 +96,7 @@ service /programme on new http:Listener(8080) {
         check caller->respond(reviewProgrammes);
     }
 
-    // 7. Retrieve all the programmes that belong to the same faculty
+    //  Retrieve all the programmes that belong to the same faculty
     resource function get programmesByFaculty(http:Caller caller, string facultyName) returns error? {
         json[] facultyProgrammes = [];  // Define as a json array
         foreach var programme in programmes {
