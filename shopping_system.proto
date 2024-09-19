@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+package shopping_system;
+
+service ShoppingSystem {
+  rpc addProduct(AddProductRequest) returns (AddProductResponse) {}
+  rpc createUsers(stream CreateUserRequest) returns (CreateUsersResponse) {}
+  rpc updateProduct(UpdateProductRequest) returns (UpdateProductResponse) {}
+  rpc removeProduct(RemoveProductRequest) returns (RemoveProductResponse) {}
+  rpc listAvailableProducts(ListAvailableProductsRequest) returns (ListAvailableProductsResponse) {}
+  rpc searchProduct(SearchProductRequest) returns (SearchProductResponse) {}
+  rpc addToCart(AddToCartRequest) returns (AddToCartResponse) {}
+  rpc placeOrder(PlaceOrderRequest) returns (PlaceOrderResponse) {}
+}
+
+message Product {
+  string name = 1;
+  string description = 2;
+  double price = 3;
+  int32 stock_quantity = 4;
+  string sku = 5;
+  bool status = 6;
+}
+
+message AddProductRequest {
+  Product product = 1;
+}
+
+message AddProductResponse {
+  string product_code = 1;
+}
+
+message CreateUserRequest {
+  string user_id = 1;
+  string user_type = 2; // customer or admin
+}
+
+message CreateUsersResponse {
+  repeated string user_ids = 1;
+}
+
+message UpdateProductRequest {
+  Product product = 1;
+}
+
+message UpdateProductResponse {
+  Product product = 1;
+}
+
+message RemoveProductRequest {
+  string sku = 1;
+}
+
+message RemoveProductResponse {
+  repeated Product products = 1;
+}
+
+message ListAvailableProductsRequest {}
+
+message ListAvailableProductsResponse {
+  repeated Product products = 1;
+}
+
+message SearchProductRequest {
+  string sku = 1;
+}
+
+message SearchProductResponse {
+  Product product = 1;
+}
+
+message AddToCartRequest {
+  string user_id = 1;
+  string sku = 2;
+}
+
+message AddToCartResponse {
+  bool success = 1;
+}
+
+message PlaceOrderRequest {
+  string user_id = 1;
+}
+
+message PlaceOrderResponse {
+  bool success = 1;
+}
